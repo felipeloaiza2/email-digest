@@ -1,0 +1,38 @@
+name: Resumen diario de correo
+
+on:
+  schedule:
+    # 13:00 UTC = 8:00am en Colombia (UTC-5). Ajusta si quieres otra hora.
+    - cron: "0 13 * * *"
+  workflow_dispatch: {}  # te permite correrlo manualmente desde la pestaña Actions
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # necesario para poder guardar last_check.txt de vuelta al repo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Correr el resumidor
+        env:
+          GMAIL_TOKEN_JSON: ${{ secrets.GMAIL_TOKEN_JSON }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python main.py
+
+      - name: Guardar el progreso (para no repetir correos)
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add last_check.txt
+          git diff --staged --quiet || git commit -m "Actualiza último chequeo"
+          git push
