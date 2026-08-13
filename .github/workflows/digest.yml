@@ -2,8 +2,10 @@ name: Resumen diario de correo
 
 on:
   schedule:
-    # 13:00 UTC = 8:00am en Colombia (UTC-5). Ajusta si quieres otra hora.
-    - cron: "0 13 * * *"
+    # cada 15 minutos. GitHub no garantiza el minuto exacto (a veces se
+    # atrasa unos minutos si hay mucha carga), pero en la práctica corre
+    # bastante confiable.
+    - cron: "*/15 * * * *"
   workflow_dispatch: {}  # te permite correrlo manualmente desde la pestaña Actions
 
 jobs:
