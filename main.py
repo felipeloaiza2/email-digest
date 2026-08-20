@@ -179,6 +179,12 @@ def main():
     emails = fetch_new_emails(service, since_ts)
     print(f"Correos nuevos encontrados: {len(emails)}")
 
+    if not emails:
+        # nada nuevo: no molestamos por Telegram, solo actualizamos el checkpoint
+        save_last_check_timestamp(run_ts)
+        print("Nada nuevo, no se envía mensaje.")
+        return
+
     results = classify_and_summarize(emails)
     message = format_message(results)
 
